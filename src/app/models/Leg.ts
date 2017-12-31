@@ -17,12 +17,15 @@ export class Leg {
   createShapes(stage: createjs.Stage) {
     this.removeShapes(stage);
     let container = (this.container = new createjs.Container());
+
     let line = container.addChild(new createjs.Shape());
     line.graphics.beginStroke('#000').setStrokeStyle(1);
     this.shapeCommands['lineStart'] = line.graphics.moveTo(0, 0).command;
     this.shapeCommands['lineEnd'] = line.graphics.lineTo(0, 0).command;
 
-    container.addChild(line);
+    let circle = container.addChild(new createjs.Shape());
+    this.shapeCommands['circle'] = circle.graphics.beginFill('DeepSkyBlue').drawCircle(0, 0, 15).command;
+
     stage.addChild(container);
   }
 
@@ -46,5 +49,9 @@ export class Leg {
     lineStartCmd.y = this.bounds.y + this.bounds.h;
     lineEndCmd.x = this.bounds.x;
     lineEndCmd.y = this.bounds.y;
+
+    let circleCmd = this.shapeCommands['circle'];
+    circleCmd.x = this.bounds.x;
+    circleCmd.y = this.bounds.y + this.bounds.h;
   }
 }

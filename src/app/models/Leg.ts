@@ -10,11 +10,14 @@ export class Leg {
   shapeCommands: { [id: string]: any } = {};
   bounds: { x: number; y: number; w: number; h: number };
 
+  nodes: any;
+
   onClick: (Leg) => void;
 
   constructor(id: any) {
     this.id = id;
     this.bounds = { x: 0, y: 0, w: 10, h: 10 };
+    this.nodes = {};
   }
 
   createShapes(stage: createjs.Stage) {
@@ -80,18 +83,18 @@ export class Leg {
 
     let circleCmd = this.shapeCommands['circle'];
     circleCmd.x = this.bounds.x;
-    circleCmd.y = this.bounds.y + this.bounds.h;
+    circleCmd.y = this.bounds.y + this.bounds.h + 15; // 加上半徑
 
     let rectCmd = this.shapeCommands['rect'];
     rectCmd.x = this.bounds.x - (rectCmd.w / 2);
-    rectCmd.y = this.bounds.y;
+    rectCmd.y = this.bounds.y - 15; // 減去1/2高
 
     let endText = this.shapeCommands['endText'];
     endText.x = this.bounds.x;
-    endText.y = this.bounds.y;
+    endText.y = this.bounds.y - 30;
 
     let startText = this.shapeCommands['startText'];
     startText.x = this.bounds.x;
-    startText.y = this.bounds.y + this.bounds.h;
+    startText.y = this.bounds.y + this.bounds.h + 30;
   }
 }

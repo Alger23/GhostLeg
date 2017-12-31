@@ -2,6 +2,7 @@ import { IGhostLegSettings } from './IGhostLegSettings';
 import * as createjs from 'createjs-module';
 import { Shuffle } from './Shuffle';
 import { Leg } from './Leg';
+import { Random } from './Random';
 export class GhostLegManager {
   stage: createjs.Stage;
   settings: IGhostLegSettings;
@@ -12,6 +13,14 @@ export class GhostLegManager {
     scaleX: number;
     scaleY: number;
   };
+
+  options = {
+    leg: {
+      offsetX: 0,
+      offsetY: 50
+    }
+  };
+
   constructor(stage: createjs.Stage) {
     this.stage = stage;
     this.env = {
@@ -44,6 +53,8 @@ export class GhostLegManager {
     this.stage.removeAllChildren();
     this.legs = [];
     this.addLegs();
+    this.addHorizontal();
+    this.addHorizontalShapes();
     this.stage.update();
   }
 
@@ -60,11 +71,74 @@ export class GhostLegManager {
 
       leg.createShapes(this.stage);
       leg.setBounds({
-        x: offsetX * (i + 1),
-        y: 50,
+        x: offsetX * (i + 1) + this.options.leg.offsetX,
+        y: 0 + this.options.leg.offsetY,
         w: 20,
-        h: this.env.height - 100
+        h: this.getLegHeight()
+      });
+      leg.onClick = this.startHere;
+    }
+  }
+
+  getLegHeight(): number {
+    return this.env.height - 100;
+  }
+  getHorizontalNodes() {
+    return 30;
+  }
+  addHorizontal() {
+    for (let s = 0, e = this.legs.length - 1; s < e; s++) {
+      let legL = this.legs[s];
+      let legR = this.legs[s + 1];
+      let horizontalCount = Random(3, 4);
+      this.linkNodes(legL, legR, horizontalCount);
+    }
+  }
+
+  linkNodes(legL: Leg, legR: Leg, count: number) {
+    let retry = 0;
+    let nodeTotal = this.getHorizontalNodes();
+
+    while (count > 0) {
+      let nodeIdx = Random(1, nodeTotal);
+      if (!legL.nodes[nodeIdx] && !legR.nodes[nodeIdx]) {
+        legL.nodes[nodeIdx] = legR;
+        legR.nodes[nodeIdx] = legL;
+        count--;
+        retry = 0;
+      } else {
+        if (retry >= nodeTotal) {
+          break;
+        }
+        retry++;
+      }
+    }
+  }
+
+  addHorizontalShapes() {
+    let offsetY = this.getLegHeight() / (this.getHorizontalNodes() + 1); // 加上一格，才不會使最後一條線剛好在起點座標
+    let container = new createjs.Container();
+
+    for (let s = 0, e = this.legs.length - 1; s < e; s++) {
+      let legL = this.legs[s];
+      let keys = Object.keys(legL.nodes);
+      keys.forEach(key => {
+        let legR = legL.nodes[key];
+        if (legR.id > legL.id) {
+          let idx = parseInt(key, 10);
+          let line = container.addChild(new createjs.Shape());
+          line.graphics.setStrokeStyle(1).beginStroke('#000');
+          let cmdStart = line.graphics.moveTo(legL.bounds.x, offsetY * idx + this.options.leg.offsetY)
+            .command;
+          let cmdEnd = line.graphics.lineTo(legR.bounds.x, offsetY * idx + this.options.leg.offsetY)
+            .command;
+        }
       });
     }
+
+    this.stage.addChild(container);
+  }
+  startHere(leg: Leg) {
+    console.log(leg);
   }
 }

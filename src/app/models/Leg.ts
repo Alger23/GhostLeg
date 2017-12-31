@@ -26,6 +26,9 @@ export class Leg {
     let circle = container.addChild(new createjs.Shape());
     this.shapeCommands['circle'] = circle.graphics.beginFill('DeepSkyBlue').drawCircle(0, 0, 15).command;
 
+    let rect = container.addChild(new createjs.Shape());
+    this.shapeCommands['rect'] = rect.graphics.beginFill('lightgreen').drawRect(-15, -10, 30, 20).command;
+
     stage.addChild(container);
   }
 
@@ -53,5 +56,9 @@ export class Leg {
     let circleCmd = this.shapeCommands['circle'];
     circleCmd.x = this.bounds.x;
     circleCmd.y = this.bounds.y + this.bounds.h;
+
+    let rectCmd = this.shapeCommands['rect'];
+    rectCmd.x = this.bounds.x - (rectCmd.w / 2);
+    rectCmd.y = this.bounds.y;
   }
 }

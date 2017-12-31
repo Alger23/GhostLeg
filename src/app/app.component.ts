@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, AfterViewInit } from '@angular/core';
 import * as createjs from 'createjs-module';
 import { GhostLegManager } from './models/GhostLegManager';
+import { IGhostLegOptions } from './models/IGhostLegOptions';
 
 @Component({
   selector: 'app-root',
@@ -16,17 +17,21 @@ export class AppComponent implements OnInit, AfterViewInit {
   manager: GhostLegManager;
 
   gameSettings: any = {
-    start: [
-      { name: '起點1' },
-      { name: '起點2' },
-      { name: '起點3' }
-    ],
-    end: [
-      { id: 'a', name: '終點 A' },
-      { id: 'b', name: '終點 B' },
-      { id: 'c', name: '終點 C' }
-    ],
+    start: [{ name: '1' }],
+    end: [{ id: '1', name: '1' }],
     random: '0'
+  };
+
+  options: IGhostLegOptions = {
+    horizontal: {
+      min: 5,
+      max: 10
+    },
+    leg: {
+      offsetX: 0,
+      offsetY: 50
+    },
+    speed: 10
   };
 
   constructor() {}
@@ -39,12 +44,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     createjs.MotionGuidePlugin.install();
 
     this.stage = new createjs.Stage(this.canvasId);
-    let stage = this.stage;
-    this.manager = new GhostLegManager(stage);
-    this.manager.load(this.gameSettings);
+    this.manager = new GhostLegManager(this.stage);
 
     createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', stage);
+    createjs.Ticker.addEventListener('tick', this.stage);
 
     this.resize();
   }
@@ -62,6 +65,22 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   start() {
-    this.manager.start();
+    this.manager.start(this.gameSettings, this.options);
+  }
+
+  addSample() {
+    this.gameSettings.start.push({
+      name: '' + (this.gameSettings.start.length + 1)
+    });
+    this.gameSettings.end.push({
+      id: this.gameSettings.end.length + 1,
+      name: '' + (this.gameSettings.end.length + 1)
+    });
+    this.start();
+  }
+  removeSample() {
+    this.gameSettings.start.pop();
+    this.gameSettings.end.pop();
+    this.start();
   }
 }

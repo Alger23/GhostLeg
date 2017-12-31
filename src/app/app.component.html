@@ -1,4 +1,10 @@
 <button (click)="start()">Start</button>
+<button (click)="addSample()">Add</button>
+<button (click)="removeSample()">Remove Last</button>
+<label>Horizontal Min:</label><input type="number" min="3" max="30" [(ngModel)]="options.horizontal.min">
+<label>Max:</label><input type="number" min="3" max="30" [(ngModel)]="options.horizontal.max">
+<label>Speed:</label><input type="number" min="1" max="20" [(ngModel)]="options.speed">
+
 <div style="background-color: #eee">
   <canvas id="canvas" width="300" height="200"></canvas>
 </div>

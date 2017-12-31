@@ -1,24 +1,22 @@
+import { IGhostLegOptions } from './IGhostLegOptions';
 import { IGhostLegSettings } from './IGhostLegSettings';
 import * as createjs from 'createjs-module';
 import { Shuffle } from './Shuffle';
 import { Leg } from './Leg';
 import { Random } from './Random';
+
 export class GhostLegManager {
   stage: createjs.Stage;
   settings: IGhostLegSettings;
+  options: IGhostLegOptions;
   legs: Leg[];
+  containers: createjs.Container[];
+
   env: {
     width: number;
     height: number;
     scaleX: number;
     scaleY: number;
-  };
-
-  options = {
-    leg: {
-      offsetX: 0,
-      offsetY: 50
-    }
   };
 
   constructor(stage: createjs.Stage) {
@@ -30,10 +28,7 @@ export class GhostLegManager {
       scaleY: 1
     };
     this.legs = [];
-  }
-
-  load(settings: IGhostLegSettings) {
-    this.settings = settings;
+    this.containers = [];
   }
 
   onParentSizeChange(size: { w: number; h: number }) {
@@ -41,7 +36,17 @@ export class GhostLegManager {
     this.env.height = size.h;
   }
 
-  start() {
+  start(settings: IGhostLegSettings, options: IGhostLegOptions) {
+    this.settings = settings;
+    this.options = Object.assign(
+      {
+        horizontal: { min: 3, max: 4 },
+        leg: { offsetX: 0, offsetY: 50 },
+        speed: 1
+      },
+      options
+    );
+
     let canvas = <HTMLCanvasElement>this.stage.canvas;
     this.env = {
       width: canvas.width,
@@ -93,7 +98,10 @@ export class GhostLegManager {
     for (let s = 0, e = this.legs.length - 1; s < e; s++) {
       let legL = this.legs[s];
       let legR = this.legs[s + 1];
-      let horizontalCount = Random(3, 4);
+      let horizontalCount = Random(
+        this.options.horizontal.min,
+        this.options.horizontal.max
+      );
       this.linkNodes(legL, legR, horizontalCount);
     }
   }
@@ -146,6 +154,11 @@ export class GhostLegManager {
     this.stage.addChild(container);
   }
   startHere(leg: Leg) {
+    if (this.containers[leg.id]) {
+      this.stage.removeChild(this.containers[leg.id]);
+      this.containers[leg.id] = null;
+    }
+
     let paths = this.findPath(leg);
     let color = '#' + (Math.random().toString(16) + '000000').substring(2, 8);
     let curve = {
@@ -174,6 +187,7 @@ export class GhostLegManager {
     };
 
     let container = this.stage.addChild(new createjs.Container());
+    this.containers[leg.id] = container;
     let currentClip = container.addChild(new createjs.Shape());
 
     let tick = event => {
@@ -189,14 +203,13 @@ export class GhostLegManager {
       curve.oldy = curve.y;
     };
     createjs.Ticker.addEventListener('tick', tick);
-    // this.containers[leg.id] = container;
-    this.stage.update();
+
     let activeTween = createjs.Tween.get(curve)
       .to(
         {
           guide: { path: getMotionPathFromPoints(paths) }
         },
-        3000,
+        this.options.speed * 200,
         createjs.Ease.linear
       )
       .call(() => {
@@ -218,12 +231,22 @@ export class GhostLegManager {
         continue;
       }
 
-      paths.push(new createjs.Point(leg.bounds.x, offsetY * idx + this.options.leg.offsetY));
-      paths.push(new createjs.Point(linkLeg.bounds.x, offsetY * idx + this.options.leg.offsetY));
+      paths.push(
+        new createjs.Point(
+          leg.bounds.x,
+          offsetY * idx + this.options.leg.offsetY
+        )
+      );
+      paths.push(
+        new createjs.Point(
+          linkLeg.bounds.x,
+          offsetY * idx + this.options.leg.offsetY
+        )
+      );
       leg = linkLeg;
       idx--;
     } while (idx > 0);
-    paths.push(new createjs.Point(leg.bounds.x,  leg.bounds.y));
+    paths.push(new createjs.Point(leg.bounds.x, leg.bounds.y));
 
     return paths;
   }

@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, AfterViewInit } from '@angular/core';
 import * as createjs from 'createjs-module';
-import { create } from 'domain';
+import { GhostLegManager } from './models/GhostLegManager';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +13,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   size: { w: number; h: number };
 
   stage: createjs.Stage;
+  manager: GhostLegManager;
+
+  gameSettings: any = {
+    start: [{name: '起點1'}],
+    end: [{ id: '999', name: '終點 999' }],
+    random: '0'
+  };
 
   constructor() {}
 
@@ -24,13 +31,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.stage = new createjs.Stage(this.canvasId);
     let stage = this.stage;
-
-    let shape = stage.addChild(new createjs.Shape());
-    shape.graphics
-      .setStrokeStyle(1)
-      .beginStroke('red')
-      .drawCircle(50, 50, 40);
-    // stage.update();
+    this.manager = new GhostLegManager(stage);
+    this.manager.load(this.gameSettings);
 
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', stage);

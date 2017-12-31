@@ -36,6 +36,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    createjs.MotionGuidePlugin.install();
+
     this.stage = new createjs.Stage(this.canvasId);
     let stage = this.stage;
     this.manager = new GhostLegManager(stage);

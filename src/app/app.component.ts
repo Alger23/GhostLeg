@@ -16,8 +16,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   manager: GhostLegManager;
 
   gameSettings: any = {
-    start: [{name: '起點1'}],
-    end: [{ id: '999', name: '終點 999' }],
+    start: [
+      { name: '起點1' },
+      { name: '起點2' },
+      { name: '起點3' }
+    ],
+    end: [
+      { id: 'a', name: '終點 A' },
+      { id: 'b', name: '終點 B' },
+      { id: 'c', name: '終點 C' }
+    ],
     random: '0'
   };
 
@@ -25,7 +33,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.canvas = <HTMLCanvasElement>document.getElementById(this.canvasId);
-    this.resize();
   }
 
   ngAfterViewInit(): void {
@@ -36,6 +43,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', stage);
+
+    this.resize();
   }
 
   @HostListener('window:resize')
@@ -46,5 +55,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     };
     this.canvas.width = this.size.w;
     this.canvas.height = this.size.h;
+
+    this.manager.onParentSizeChange(this.size);
+  }
+
+  start() {
+    this.manager.start();
   }
 }
